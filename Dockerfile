@@ -1,0 +1,11 @@
+FROM node:22-alpine
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+WORKDIR /app
+COPY package.json ./
+COPY src ./src
+COPY backend ./backend
+COPY public ./public
+USER node
+EXPOSE 8080
+CMD ["node", "src/server.js"]

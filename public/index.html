@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101a2b" />
+  <title>LimitLab · Distributed API Rate Limiter</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/"><span class="brand-mark">L<span>↗</span></span><span>Limit<span class="mint">Lab</span><small>API INFRASTRUCTURE</small></span></a>
+      <div class="top-actions"><span id="modeChip" class="chip"><i></i> Detecting Redis...</span><a href="/api/health" target="_blank" rel="noopener">Health API ↗</a><a href="https://github.com/Sumit1153" target="_blank" rel="noopener">GitHub ↗</a></div>
+    </header>
+    <main>
+      <section class="hero">
+        <div><span class="eyebrow"><span class="bullet"></span> BACKEND ENGINEERING · DISTRIBUTED SYSTEMS</span>
+          <h1>Control traffic.<br /><em>Keep systems alive.</em></h1>
+          <p>An interactive API gateway lab. Run concurrent requests, compare four rate-limiting algorithms and witness Redis outage failover in real time.</p>
+          <div class="hero-pills"><span>⚡ Atomic Redis Lua</span><span>◈ 4 algorithms</span><span>↻ Memory fallback</span></div>
+        </div>
+        <div class="hero-visual" aria-label="System architecture">
+          <div class="node client"><b>CLIENTS</b><small>HTTP bursts</small></div>
+          <div class="connector"></div>
+          <div class="node gateway"><span>◈</span><b>NODE.JS GATEWAY</b><small>Atomic limiter check</small></div>
+          <div class="fork"><span>↙</span><span>↘</span></div>
+          <div class="nodes-bottom"><div class="node redis"><b>REDIS</b><small>Shared rate state</small></div><div class="node backend"><b>BACKEND</b><small>200 OK / 429</small></div></div>
+        </div>
+      </section>
+      <section class="metrics" aria-label="Gateway metrics">
+        <article class="metric"><span>REQUESTS</span><strong id="total">0</strong><small>Gateway requests</small></article>
+        <article class="metric"><span>ALLOWED</span><strong id="allowed" class="green">0</strong><small>Forwarded to backend</small></article>
+        <article class="metric"><span>BLOCKED</span><strong id="blocked" class="amber">0</strong><small>HTTP 429</small></article>
+        <article class="metric"><span>P95 LATENCY</span><strong id="latency">0<sup>ms</sup></strong><small>Recent requests</small></article>
+      </section>
+      <section class="grid">
+        <article class="panel tester">
+          <div class="panel-heading"><div><span class="tag">01 · REQUEST PLAYGROUND</span><h2>Test the limiter</h2></div><span class="live">● LIVE</span></div>
+          <label for="algorithm">Algorithm</label>
+          <select id="algorithm"><option value="token_bucket">Token Bucket</option><option value="fixed_window">Fixed Window</option><option value="sliding_window">Sliding Window</option><option value="leaky_bucket">Leaky Bucket</option></select>
+          <p id="algorithmInfo" class="hint">Allows bursts while refilling tokens over time.</p>
+          <div class="two"><div><label for="requestCount">Concurrent requests</label><input id="requestCount" type="number" min="1" max="100" value="10" /></div><div><label for="clientName">Demo identity</label><input id="clientName" type="text" maxlength="40" value="demo-user" /></div></div>
+          <div class="hint" id="configText">Reading limit configuration...</div>
+          <button id="send" class="primary">⚡ Send request burst <span>→</span></button>
+          <p class="disclaimer" id="switchNotice">Algorithm switching and demo identity are only enabled in demo mode.</p>
+        </article>
+        <article class="panel activity">
+          <div class="panel-heading"><div><span class="tag">02 · LIVE TRACE</span><h2>Request results</h2></div><button id="clear" class="text-btn">Clear</button></div>
+          <div class="trace-summary"><div><span class="legend green-dot"></span><b id="burstAllowed">0</b> Allowed</div><div><span class="legend amber-dot"></span><b id="burstBlocked">0</b> Blocked</div><div><span class="legend blue-dot"></span><b id="burstFallback">0</b> Fallback</div></div>
+          <div class="trace-head"><span>STATUS</span><span>ALGORITHM / MODE</span><span>LATENCY</span></div>
+          <div id="trace" class="trace"><p class="empty">Send a burst to visualize gateway decisions.</p></div>
+        </article>
+      </section>
+      <section class="explain">
+        <div><span class="tag">03 · UNDER THE HOOD</span><h2>Four strategies. One gateway.</h2><p>Redis executes each check as a single atomic Lua script. If Redis cannot be reached, the service continues in explicitly labeled per-instance fallback mode.</p></div>
+        <div class="algo-grid"><article><b>01</b><h3>Token Bucket</h3><p>Refill tokens at a steady rate. Short bursts are accepted until tokens run out.</p></article><article><b>02</b><h3>Fixed Window</h3><p>Count requests within discrete windows. Boundary bursts can occur.</p></article><article><b>03</b><h3>Sliding Window</h3><p>Count requests in the preceding rolling interval using a sorted set.</p></article><article><b>04</b><h3>Leaky Bucket</h3><p>Drain accumulated usage over time; reject when full. No request queue.</p></article></div>
+      </section>
+    </main>
+    <footer><span>LimitLab · Node.js / Redis / Docker</span><span>Built for reproducible system design experiments</span></footer>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
